@@ -1,0 +1,5 @@
+<resources>
+    <string name="app_name">AutoSlideShow02</string>
+    <string name="play_btn">PLAY</string>
+    <string name="stop_btn">STOP</string>
+</resources>
