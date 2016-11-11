@@ -49,7 +49,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         @Override
         public void run() {
             if (mSlideshow) {
-                mHandler.post(new Runnable() {
+                boolean post = mHandler.post(new Runnable() {
                     @Override
                     public void run() {
                         movePosition(1);
@@ -134,8 +134,12 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
                 array_image.add(id);
 
-                for (int i = 0; i < array_image.size(); i++) {
-                    imageView.setImageURI(ContentUris.withAppendedId(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, array_image.get(mPosition)));
+                try {
+                    for (int i = 0; i < array_image.size(); i++) {
+                        imageView.setImageURI(ContentUris.withAppendedId(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, array_image.get(mPosition)));
+                    }
+                } catch (IndexOutOfBoundsException e) {
+                    Log.d("javaTest", String.valueOf(array_image.size()));
                 }
 
 
@@ -151,39 +155,53 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         } else if (mPosition < 0) {
             mPosition = array_image.size() - 1;
         }
-        imageView.setImageURI(ContentUris.withAppendedId(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, array_image.get(mPosition)));
+        try {
+            imageView.setImageURI(ContentUris.withAppendedId(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, array_image.get(mPosition)));
+        }catch(IndexOutOfBoundsException e){
+            Log.d("javatest",String.valueOf(mPosition));
+        }
     }
 
 
-    @Override
     public void onClick(View v) {
-        mSlideshow = !mSlideshow;
 
-        if (mSlideshow) {
-            //タイマーの初期化処理
-            mTimer = new Timer();
-            mTimerTask = new MainTimerTask();
-            mTimer.schedule(mTimerTask, 0, 2000);
-
-            play_btn.setText(R.string.stop_btn);
-            prev_btn.setEnabled(false);
-            next_btn.setEnabled(false);
-
-        } else {
-            mSlideshow = false;
-            play_btn.setText(R.string.play_btn);
-            prev_btn.setEnabled(true);
-            next_btn.setEnabled(true);
-
-        }
-
-        switch (v.getId()){
+        switch (v.getId()) {
             case R.id.prev_btn:
                 movePosition(-1);
                 break;
+
+            case R.id.next_btn:
+                movePosition(1);
+                break;
+
+            case R.id.play_btn:
+                mSlideshow = !mSlideshow;
+                if (mSlideshow) {
+                    //タイマーの初期化処理
+                    mTimer = new Timer();
+                    mTimerTask = new MainTimerTask();
+                    mTimer.schedule(mTimerTask, 0, 2000);
+
+                    play_btn.setText(R.string.stop_btn);
+                    prev_btn.setEnabled(false);
+                    next_btn.setEnabled(false);
+
+                } else {
+                    mSlideshow = false;
+                    play_btn.setText(R.string.play_btn);
+                    prev_btn.setEnabled(true);
+                    next_btn.setEnabled(true);
+                    try {
+                        mTimer.cancel();
+                        mTimer = null;
+                    } catch (NullPointerException e) {
+                    }
+                }
+                break;
+
+            default:
+                break;
         }
-
-
 
 
     }
